@@ -1,4 +1,5 @@
 import rough from "roughjs";
+import { Options } from "roughjs/bin/core";
 import { RoughSVG } from "roughjs/bin/svg";
 
 import {
@@ -9,6 +10,28 @@ import {
   getNumber,
   getOptions,
 } from "./utils";
+
+export interface Customiser {
+  /**
+   * hook to return custom options for element. return nothing to proceed with the default.
+   */
+  customOptions?: (path: string[], element: SVGElement, options: Options) => Options | undefined;
+
+  /**
+   * hook to return custom svg element. return nothing to proceed with the default.
+   */
+  decider?: (path: string[], before: SVGGElement, after: SVGGElement) => SVGGElement | undefined;
+}
+
+const nodePath: (node: Element | null) => string[] = (node: Element | null) => {
+  if (!node) {
+    return [];
+  }
+
+  return nodePath(node.parentElement)
+    .concat([`${node.nodeName}.${node.id}`])
+    .filter((el) => Boolean(el));
+};
 
 const blacklist = [
   "cx",
@@ -95,15 +118,25 @@ const getReplacement = (original: RoughSupportedElement, roughSvg: RoughSVG) => 
   }
 };
 
-export default (svg: SVGSVGElement, options = {}): void => {
+export default (svg: SVGSVGElement, options: Options & Customiser = {}): void => {
   const roughSvg = rough.svg(svg, { options });
 
   const children = svg.querySelectorAll<RoughSupportedElement>(
     Object.values(RoughSupportedTag).join(",")
   );
 
+  const decider = options.decider ?? (() => undefined);
+  const optionator = options.customOptions ?? (() => undefined);
+
   for (const original of children) {
-    const replacement = getReplacement(original, roughSvg);
+    const path = nodePath(original);
+
+    const customOptions = optionator(path, original, options);
+
+    const replacement = getReplacement(
+      original,
+      !customOptions ? roughSvg : rough.svg(svg, { options: customOptions })
+    );
 
     const attributes = getAttributes(original).filter(
       (attribute) => !blacklist.includes(attribute.name)
@@ -113,6 +146,8 @@ export default (svg: SVGSVGElement, options = {}): void => {
       replacement.setAttribute(name, value);
     });
 
-    original.replaceWith(replacement);
+    original.replaceWith(decider(path, original, replacement) ?? replacement);
   }
 };
+
+export { Options } from "roughjs/bin/core";

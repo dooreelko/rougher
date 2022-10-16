@@ -98,6 +98,32 @@ console.log(roughUp(inputContents.toString()));
 </script>
 ```
 
+## Configuration
+```typescript
+roughUp(input: string, options: Options & Customiser = {}): string
+```
+
+Where `Options` are the [options you normally pass to `rough.js`](https://github.com/rough-stuff/rough/wiki#options)
+
+The `Customiser` is an interface that has two optional fields:
+
+```typescript
+export interface Customiser {
+  /**
+   * hook to return custom options for element. return nothing to proceed with the default.
+   */
+  customOptions?: (path: string[], element: SVGElement, options: Options) => Options | undefined;
+
+  /**
+   * hook to return custom svg element. return nothing to proceed with the default.
+   */
+  decider?: (path: string[], before: SVGGElement, after: SVGGElement) => SVGGElement | undefined;
+} 
+```
+
+The `customOptions` allows you to apply custom options for a specific element.
+The `decider` allows you to customise which SVG element to use as a replacement.
+
 ## Build
 
 To build:
