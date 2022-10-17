@@ -31,3 +31,27 @@ describe("roughUp", () => {
     });
   });
 });
+
+describe("custom roughUp", () => {
+  let svg: SVGSVGElement;
+
+  it("returns a roughed up version with custom options", () => {
+    window.document.body.innerHTML = readFixture("circle.svg");
+    svg = window.document.querySelector("svg") as SVGSVGElement;
+    roughUp(svg, {
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      customOptions: (_path, _elem, options) => ({ ...options, fillStyle: "solid" }),
+    });
+
+    expect(svg).toMatchSnapshot();
+  });
+
+  it("returns a roughed up version with custom decider", () => {
+    window.document.body.innerHTML = readFixture("circle.svg");
+    svg = window.document.querySelector("svg") as SVGSVGElement;
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    roughUp(svg, { decider: (_, before) => before });
+
+    expect(svg).toMatchSnapshot();
+  });
+});
