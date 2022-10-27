@@ -1,7 +1,7 @@
 {
     "name": "@arinoto/rougher",
     "description": "Customisable Rough up an SVG using Rough.js.",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "license": "MIT",
     "homepage": "https://github.com/dooreelko/rougher",
     "author": {
@@ -13,12 +13,16 @@
         "type": "git",
         "url": "https://github.com/dooreelko/rougher.git"
     },
+    "publishConfig": {
+        "access": "public",
+        "registry": "https://registry.npmjs.org/"
+    },
     "bin": {
         "rougher": "dist/cli/rougher.js"
     },
     "browser": "dist/browser/rougher.js",
     "main": "dist/node/rougher.js",
-    "types": "src/node/index.ts",
+    "types": "dist/node/src/node/index.d.ts",
     "module": "dist/node/rougher.mjs",
     "files": [
         "dist"
